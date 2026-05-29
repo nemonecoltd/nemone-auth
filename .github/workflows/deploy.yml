@@ -1,0 +1,31 @@
+name: Deploy Auth Server
+
+on:
+  push:
+    branches: [main]
+
+# 동시 배포 방지
+concurrency:
+  group: auth-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to VM (auth only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: SSH 배포
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          command_timeout: 12m
+          script: |
+            export HOME=/home/ubuntu
+            cd /var/www/auth
+            git fetch origin main
+            git reset --hard origin/main
+            bash deploy.sh

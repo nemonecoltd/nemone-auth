@@ -1,0 +1,17 @@
+# dependencies
+node_modules/
+
+# build output
+.next/
+out/
+
+# env files (절대 커밋 금지)
+.env
+.env.*
+!.env.example
+
+# misc
+*.tar.gz
+.DS_Store
+*.local
+npm-debug.log*
