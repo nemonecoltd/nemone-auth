@@ -1,12 +1,11 @@
 module.exports = {
   apps: [{
     name: 'auth',
-    script: 'npm',
-    args: 'start',
+    script: 'node_modules/.bin/next',
+    args: 'start -p 3003',
     cwd: '/var/www/auth',
     env: {
       NODE_ENV: 'production',
-      PORT: 3003,
       HOSTNAME: '0.0.0.0'
     }
   }]
