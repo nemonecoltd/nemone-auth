@@ -8,6 +8,21 @@ import Link from 'next/link';
 export default function LoginPage() {
   const supabase = createClient();
 
+  const handleKakaoLogin = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const nextUrl = urlParams.get('next');
+    let redirectUrl = `${window.location.origin}/auth/callback`;
+    if (nextUrl) redirectUrl += `?next=${encodeURIComponent(nextUrl)}`;
+
+    await supabase.auth.signInWithOAuth({
+      provider: 'kakao',
+      options: {
+        redirectTo: redirectUrl,
+        scopes: 'profile_nickname',
+      },
+    });
+  };
+
   const handleGoogleLogin = async () => {
     // URL에서 next 파라미터 추출
     const urlParams = new URLSearchParams(window.location.search);
@@ -60,6 +75,17 @@ export default function LoginPage() {
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
               Google 계정으로 계속하기
+            </button>
+
+            {/* Kakao Login Button */}
+            <button
+              onClick={handleKakaoLogin}
+              className="w-full py-4 bg-[#FEE500] text-[#000000] rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-[#FDD800] transition-all duration-300 transform hover:-translate-y-1 shadow-lg"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 3C6.48 3 2 6.48 2 10.8c0 2.7 1.6 5.07 4.03 6.53L5 21l4.51-2.37C10.3 18.84 11.15 19 12 19c5.52 0 10-3.48 10-8.2C22 6.48 17.52 3 12 3z"/>
+              </svg>
+              카카오로 계속하기
             </button>
 
             <div className="relative py-4">
