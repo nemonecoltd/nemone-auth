@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { motion } from 'framer-motion';
 import { Mail, ArrowRight, ShieldCheck } from 'lucide-react';
@@ -7,6 +8,12 @@ import Link from 'next/link';
 
 export default function LoginPage() {
   const supabase = createClient();
+  const [signupHref, setSignupHref] = useState('/signup');
+
+  useEffect(() => {
+    const nextUrl = new URLSearchParams(window.location.search).get('next');
+    if (nextUrl) setSignupHref(`/signup?next=${encodeURIComponent(nextUrl)}`);
+  }, []);
 
   const handleKakaoLogin = async () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -98,8 +105,8 @@ export default function LoginPage() {
             </div>
 
             {/* Email Login Link */}
-            <Link 
-              href="/signup"
+            <Link
+              href={signupHref}
               className="w-full py-4 bg-transparent border border-white/10 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
             >
               <Mail size={18} className="text-zinc-500" />

@@ -51,9 +51,9 @@ export default function OnboardingPage() {
     });
 
     if (!error) {
-      // 가입 완료 후 "지금여기"나 "네모네AIM" 중 한 곳으로 리다이렉트
-      // 여기서는 기본적으로 메인 매거진으로 안내합니다.
-      router.push('https://nemoneai.com');
+      // 가입을 시작한 사이트("지금여기" 또는 "네모네AIM")로 복귀. next가 없으면 기본적으로 메인 매거진으로 안내.
+      const nextUrl = new URLSearchParams(window.location.search).get('next');
+      window.location.href = (nextUrl && nextUrl.startsWith('http')) ? nextUrl : 'https://nemoneai.com';
     } else {
       alert('저장 중 오류가 발생했습니다.');
       setIsSaving(false);

@@ -21,12 +21,13 @@ export default function SignupPage() {
     setIsLoading(true);
     setError('');
 
+    const nextUrl = new URLSearchParams(window.location.search).get('next');
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: name },
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
+        emailRedirectTo: `${window.location.origin}/auth/callback${nextUrl ? `?next=${encodeURIComponent(nextUrl)}` : ''}`,
       },
     });
 

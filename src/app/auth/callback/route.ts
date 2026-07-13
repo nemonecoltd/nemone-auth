@@ -17,9 +17,12 @@ export async function GET(request: Request) {
       // 온보딩 완료 여부 확인
       const onboardingCompleted = data.user.user_metadata?.onboarding_completed;
       
-      // 1. 온보딩이 안 된 경우 무조건 auth 서버의 온보딩 페이지로
+      // 1. 온보딩이 안 된 경우 auth 서버의 온보딩 페이지로 (가입을 시작한 사이트로 되돌아갈 수 있도록 next를 이어서 전달)
       if (!onboardingCompleted) {
-        return NextResponse.redirect(`${origin}/onboarding`)
+        const onboardingUrl = next.startsWith('http')
+          ? `${origin}/onboarding?next=${encodeURIComponent(next)}`
+          : `${origin}/onboarding`
+        return NextResponse.redirect(onboardingUrl)
       }
 
       // 2. 온보딩이 완료된 경우
