@@ -30,6 +30,20 @@ export default function LoginPage() {
     });
   };
 
+  const handleNaverLogin = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const nextUrl = urlParams.get('next');
+    let redirectUrl = `${window.location.origin}/auth/callback`;
+    if (nextUrl) redirectUrl += `?next=${encodeURIComponent(nextUrl)}`;
+
+    await supabase.auth.signInWithOAuth({
+      provider: 'custom:naver' as any,
+      options: {
+        redirectTo: redirectUrl,
+      },
+    });
+  };
+
   const handleGoogleLogin = async () => {
     // URL에서 next 파라미터 추출
     const urlParams = new URLSearchParams(window.location.search);
@@ -93,6 +107,17 @@ export default function LoginPage() {
                 <path d="M12 3C6.48 3 2 6.48 2 10.8c0 2.7 1.6 5.07 4.03 6.53L5 21l4.51-2.37C10.3 18.84 11.15 19 12 19c5.52 0 10-3.48 10-8.2C22 6.48 17.52 3 12 3z"/>
               </svg>
               카카오로 계속하기
+            </button>
+
+            {/* Naver Login Button */}
+            <button
+              onClick={handleNaverLogin}
+              className="w-full py-4 bg-[#03C75A] text-white rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-[#02b350] transition-all duration-300 transform hover:-translate-y-1 shadow-lg"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                <path d="M14.5 3v9.6L9.6 3H3v18h6.5v-9.6l4.9 9.6H21V3h-6.5z" fill="currentColor" />
+              </svg>
+              네이버로 계속하기
             </button>
 
             <div className="relative py-4">
