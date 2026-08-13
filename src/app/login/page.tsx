@@ -5,12 +5,17 @@ import { createClient } from '@/utils/supabase/client';
 import { motion } from 'framer-motion';
 import { Mail, ArrowRight, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
+import { Lang, detectLang, tr } from '@/utils/lang';
+import LangSwitcher from '@/components/LangSwitcher';
 
 export default function LoginPage() {
   const supabase = createClient();
   const [signupHref, setSignupHref] = useState('/signup');
+  const [lang, setLang] = useState<Lang>('ko');
+  const t = (ko: string, en: string, zh: string, ja: string) => tr(lang, ko, en, zh, ja);
 
   useEffect(() => {
+    setLang(detectLang(window.location.search));
     const nextUrl = new URLSearchParams(window.location.search).get('next');
     if (nextUrl) setSignupHref(`/signup?next=${encodeURIComponent(nextUrl)}`);
   }, []);
@@ -74,12 +79,25 @@ export default function LoginPage() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-[440px] z-10"
       >
+        <div className="flex justify-center mb-6">
+          <LangSwitcher lang={lang} onChange={setLang} />
+        </div>
+
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-[900] italic tracking-[-0.05em] font-display text-brand-gold mb-4">
             NEMONE
           </h1>
-          <h2 className="text-2xl font-bold tracking-tight text-white mb-2">통합 인증 센터</h2>
-          <p className="text-zinc-500 text-sm font-medium">단 하나의 계정으로 연결되는 네모네 생태계</p>
+          <h2 className="text-2xl font-bold tracking-tight text-white mb-2">
+            {t('통합 인증 센터', 'Unified Auth Center', '统一认证中心', '統合認証センター')}
+          </h2>
+          <p className="text-zinc-500 text-sm font-medium">
+            {t(
+              '단 하나의 계정으로 연결되는 네모네 생태계',
+              'One account, the entire NEMONE ecosystem',
+              '一个账户,连接整个NEMONE生态系统',
+              'ひとつのアカウントでつながるNEMONEエコシステム',
+            )}
+          </p>
         </div>
 
         <div className="bg-white/5 border border-white/10 p-10 rounded-[40px] backdrop-blur-xl shadow-2xl">
@@ -95,7 +113,7 @@ export default function LoginPage() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
-              Google 계정으로 계속하기
+              {t('Google 계정으로 계속하기', 'Continue with Google', '使用 Google 账户继续', 'Googleアカウントで続ける')}
             </button>
 
             {/* Kakao Login Button */}
@@ -106,7 +124,7 @@ export default function LoginPage() {
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 3C6.48 3 2 6.48 2 10.8c0 2.7 1.6 5.07 4.03 6.53L5 21l4.51-2.37C10.3 18.84 11.15 19 12 19c5.52 0 10-3.48 10-8.2C22 6.48 17.52 3 12 3z"/>
               </svg>
-              카카오로 계속하기
+              {t('카카오로 계속하기', 'Continue with Kakao', '使用 Kakao 继续', 'カカオで続ける')}
             </button>
 
             {/* Naver Login Button */}
@@ -117,7 +135,7 @@ export default function LoginPage() {
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
                 <path d="M14.5 3v9.6L9.6 3H3v18h6.5v-9.6l4.9 9.6H21V3h-6.5z" fill="currentColor" />
               </svg>
-              네이버로 계속하기
+              {t('네이버로 계속하기', 'Continue with Naver', '使用 Naver 继续', 'Naverで続ける')}
             </button>
 
             <div className="relative py-4">
@@ -135,14 +153,19 @@ export default function LoginPage() {
               className="w-full py-4 bg-transparent border border-white/10 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
             >
               <Mail size={18} className="text-zinc-500" />
-              이메일 주소로 시작하기
+              {t('이메일 주소로 시작하기', 'Continue with email', '使用邮箱开始', 'メールアドレスで始める')}
             </Link>
           </div>
 
           <div className="mt-10 pt-8 border-t border-white/5 flex items-center gap-3 text-zinc-600">
             <ShieldCheck size={24} className="text-brand-emerald opacity-50" />
             <p className="text-[10px] leading-relaxed font-medium">
-              보안 인증됨. 네모네는 통합 계정 시스템을 통해 유저님의 데이터를 안전하게 암호화하여 관리합니다.
+              {t(
+                '보안 인증됨. 네모네는 통합 계정 시스템을 통해 유저님의 데이터를 안전하게 암호화하여 관리합니다.',
+                'Verified & secure. NEMONE encrypts and protects your data through a unified account system.',
+                '安全认证。NEMONE通过统一账户系统对您的数据进行加密保护。',
+                'セキュリティ認証済み。NEMONEは統合アカウントシステムでユーザーのデータを安全に暗号化して管理します。',
+              )}
             </p>
           </div>
         </div>

@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, ArrowRight, Loader2, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Lang, detectLang, tr } from '@/utils/lang';
+import LangSwitcher from '@/components/LangSwitcher';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -15,6 +17,12 @@ export default function SignupPage() {
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [lang, setLang] = useState<Lang>('ko');
+  const t = (ko: string, en: string, zh: string, ja: string) => tr(lang, ko, en, zh, ja);
+
+  useEffect(() => {
+    setLang(detectLang(window.location.search));
+  }, []);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +43,12 @@ export default function SignupPage() {
       setError(error.message);
       setIsLoading(false);
     } else {
-      alert('회원가입 신청 완료! 이메일을 확인하여 인증을 완료해주세요.');
+      alert(t(
+        '회원가입 신청 완료! 이메일을 확인하여 인증을 완료해주세요.',
+        'Sign-up complete! Please check your email to verify your account.',
+        '注册申请完成!请查收邮箱完成验证。',
+        '会員登録の申請が完了しました!メールをご確認の上、認証を完了してください。',
+      ));
       router.push('/login');
     }
   };
@@ -49,13 +62,25 @@ export default function SignupPage() {
         animate={{ opacity: 1, x: 0 }}
         className="w-full max-w-[440px] z-10"
       >
-        <Link href="/login" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors mb-8 text-sm font-bold">
-          <ChevronLeft size={18} /> 로그인으로 돌아가기
-        </Link>
+        <div className="flex items-center justify-between mb-8">
+          <Link href="/login" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-sm font-bold">
+            <ChevronLeft size={18} /> {t('로그인으로 돌아가기', 'Back to login', '返回登录', 'ログインに戻る')}
+          </Link>
+          <LangSwitcher lang={lang} onChange={setLang} />
+        </div>
 
         <div className="mb-10">
-          <h2 className="text-3xl font-black text-white tracking-tight mb-2">계정 만들기</h2>
-          <p className="text-zinc-500 text-sm font-medium">네모네 생태계의 새로운 멤버가 되어주세요.</p>
+          <h2 className="text-3xl font-black text-white tracking-tight mb-2">
+            {t('계정 만들기', 'Create Account', '创建账户', 'アカウント作成')}
+          </h2>
+          <p className="text-zinc-500 text-sm font-medium">
+            {t(
+              '네모네 생태계의 새로운 멤버가 되어주세요.',
+              'Become a new member of the NEMONE ecosystem.',
+              '成为NEMONE生态系统的新成员。',
+              'NEMONEエコシステムの新しいメンバーになりましょう。',
+            )}
+          </p>
         </div>
 
         <div className="bg-white/5 border border-white/10 p-10 rounded-[40px] backdrop-blur-xl shadow-2xl">
@@ -76,7 +101,7 @@ export default function SignupPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm font-medium text-white focus:outline-none focus:border-brand-gold transition-all"
-                  placeholder="홍길동"
+                  placeholder={t('홍길동', 'Jane Doe', '张三', '山田太郎')}
                 />
               </div>
             </div>
@@ -118,7 +143,7 @@ export default function SignupPage() {
               className="w-full bg-white text-black rounded-2xl py-4 font-bold flex items-center justify-center gap-2 hover:bg-brand-gold transition-all shadow-xl disabled:opacity-50 mt-8"
             >
               {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                <>가입하기 <ArrowRight className="w-5 h-5" /></>
+                <>{t('가입하기', 'Sign Up', '注册', '登録する')} <ArrowRight className="w-5 h-5" /></>
               )}
             </button>
           </form>
