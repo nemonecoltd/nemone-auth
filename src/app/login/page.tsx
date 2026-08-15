@@ -178,7 +178,7 @@ export default function LoginPage() {
           </div>
           <div className="text-center">
             <div className="w-1.5 h-1.5 rounded-full bg-brand-emerald mx-auto mb-2 shadow-[0_0_8px_#10b981]"></div>
-            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">NOW HERE</span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">NEMONE PACE</span>
           </div>
         </div>
       </motion.div>
