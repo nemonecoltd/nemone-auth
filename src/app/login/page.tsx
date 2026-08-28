@@ -7,6 +7,7 @@ import { Mail, ArrowRight, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { Lang, detectLang, tr } from '@/utils/lang';
 import LangSwitcher from '@/components/LangSwitcher';
+import BrandBridge from '@/components/BrandBridge';
 
 export default function LoginPage() {
   const supabase = createClient();
@@ -171,16 +172,7 @@ export default function LoginPage() {
         </div>
 
         {/* Brand Bridge Slogans */}
-        <div className="mt-12 flex justify-center gap-6">
-          <div className="text-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-brand-gold mx-auto mb-2 shadow-[0_0_8px_#D4AF37]"></div>
-            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">NEMONE AIM</span>
-          </div>
-          <div className="text-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-brand-emerald mx-auto mb-2 shadow-[0_0_8px_#10b981]"></div>
-            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">NEMONE PACE</span>
-          </div>
-        </div>
+        <BrandBridge className="mt-12" />
       </motion.div>
     </div>
   );

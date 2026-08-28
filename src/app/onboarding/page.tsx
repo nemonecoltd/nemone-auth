@@ -14,6 +14,9 @@ const INTERESTS = [
   { id: 'space', ko: '공간', en: 'Spaces', zh: '空间', ja: '空間', koDesc: '머무는 것만으로도 가치 있는 곳', enDesc: 'Places worth visiting just to be there', zhDesc: '仅仅停留就有价值的地方', jaDesc: '滞在するだけで価値のある場所' },
   { id: 'fashion', ko: '패션', en: 'Fashion', zh: '时尚', ja: 'ファッション', koDesc: '자신만의 철학을 담은 스타일', enDesc: 'Styles that carry your own philosophy', zhDesc: '蕴含自我哲学的风格', jaDesc: '自分だけの哲学を込めたスタイル' },
   { id: 'product', ko: '프로덕트', en: 'Products', zh: '产品', ja: 'プロダクト', koDesc: '삶의 질을 높이는 감각적 도구', enDesc: 'Thoughtful tools that elevate everyday life', zhDesc: '提升生活品质的感性工具', jaDesc: '生活の質を高める感性的な道具' },
+  // PLANTS 합류(2026-08-28) — 기존 항목이 전부 AIM/PACE 취향이라 식물 쪽에서 가입한
+  // 사용자가 고를 게 없었음
+  { id: 'plant', ko: '식물', en: 'Plants', zh: '植物', ja: '植物', koDesc: '공간에 생기를 더하는 초록 반려식물', enDesc: 'Green companions that bring a space to life', zhDesc: '为空间增添生机的绿色伴侣植物', jaDesc: '空間に生気を添えるグリーンの相棒' },
 ];
 
 export default function OnboardingPage() {
@@ -61,7 +64,7 @@ export default function OnboardingPage() {
     });
 
     if (!error) {
-      // 가입을 시작한 사이트("지금여기" 또는 "네모네AIM")로 복귀. next가 없으면 기본적으로 메인 매거진으로 안내.
+      // 가입을 시작한 사이트(AIM/PACE/PLANTS 등)로 복귀. next가 없으면 기본적으로 메인 매거진으로 안내.
       const nextUrl = new URLSearchParams(window.location.search).get('next');
       window.location.href = (nextUrl && nextUrl.startsWith('http')) ? nextUrl : 'https://nemoneai.com';
     } else {

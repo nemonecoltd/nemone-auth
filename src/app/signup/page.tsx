@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Lang, detectLang, tr } from '@/utils/lang';
 import LangSwitcher from '@/components/LangSwitcher';
+import BrandBridge from '@/components/BrandBridge';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -148,6 +149,9 @@ export default function SignupPage() {
             </button>
           </form>
         </div>
+
+        {/* 이 계정 하나로 어떤 서비스를 쓰게 되는지 가입 시점에 보여줌 */}
+        <BrandBridge className="mt-12" />
       </motion.div>
     </div>
   );
