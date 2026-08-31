@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, Loader2, ChevronLeft } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Lang, detectLang, tr } from '@/utils/lang';
@@ -15,7 +15,6 @@ export default function SignupPage() {
   const supabase = createClient();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [lang, setLang] = useState<Lang>('ko');
@@ -36,7 +35,6 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        data: { full_name: name },
         emailRedirectTo: `${window.location.origin}/auth/callback${nextUrl ? `?next=${encodeURIComponent(nextUrl)}` : ''}`,
       },
     });
@@ -127,21 +125,6 @@ export default function SignupPage() {
           )}
 
           <form onSubmit={handleSignup} className="space-y-5">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-2">Full Name</label>
-              <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm font-medium text-white focus:outline-none focus:border-brand-gold transition-all"
-                  placeholder={t('홍길동', 'Jane Doe', '张三', '山田太郎')}
-                />
-              </div>
-            </div>
-
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-2">Email Address</label>
               <div className="relative">
