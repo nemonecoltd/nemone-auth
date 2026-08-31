@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Camera, Loader2, Save, User as UserIcon, Globe, ArrowLeft, Check } from 'lucide-react';
+import { Camera, Loader2, Save, User as UserIcon, Globe, ArrowLeft, Check, Trash2 } from 'lucide-react';
 import { Lang, detectLang, tr } from '@/utils/lang';
 import LangSwitcher from '@/components/LangSwitcher';
 
@@ -29,6 +29,7 @@ function ProfileContent() {
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [userId, setUserId] = useState('');
   const [email, setEmail] = useState('');
@@ -151,6 +152,36 @@ function ProfileContent() {
       ));
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = confirm(t(
+      '정말 계정을 삭제하시겠습니까?\n네모네(PACE/PLANTS/matmatch 등 모든 서비스)에서 이 계정으로 다시 로그인할 수 없게 되며, 이 작업은 되돌릴 수 없습니다.',
+      'Are you sure you want to delete your account?\nYou will no longer be able to sign in with this account on any NEMONE service (PACE/PLANTS/matmatch, etc). This cannot be undone.',
+      '确定要删除账户吗?\n此账户将无法再登录任何NEMONE服务(PACE/PLANTS/matmatch等),此操作无法撤销。',
+      '本当にアカウントを削除しますか?\nこのアカウントではNEMONEのすべてのサービス(PACE/PLANTS/matmatchなど)に再度ログインできなくなり、この操作は元に戻せません。',
+    ));
+    if (!confirmed) return;
+
+    setIsDeleting(true);
+    setError('');
+    try {
+      const res = await fetch('/api/delete-account', { method: 'POST' });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || 'delete failed');
+      }
+      await supabase.auth.signOut();
+      window.location.href = '/login';
+    } catch {
+      setError(t(
+        '계정 삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+        'An error occurred while deleting your account. Please try again in a moment.',
+        '删除账户时发生错误。请稍后再试。',
+        'アカウント削除中にエラーが発生しました。しばらくしてからもう一度お試しください。',
+      ));
+      setIsDeleting(false);
     }
   };
 
@@ -305,6 +336,31 @@ function ProfileContent() {
             <><Save size={18} /> {t('변경사항 저장', 'Save Changes', '保存修改', '変更を保存')}</>
           )}
         </button>
+
+        <div className="mt-14 pt-6 border-t border-white/5">
+          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-rose-500/70 mb-3">
+            {t('위험 구역', 'Danger Zone', '危险区域', '危険ゾーン')}
+          </p>
+          <button
+            onClick={handleDeleteAccount}
+            disabled={isDeleting}
+            className="w-full py-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-rose-500/20 transition-colors disabled:opacity-50"
+          >
+            {isDeleting ? (
+              <Loader2 className="animate-spin" size={18} />
+            ) : (
+              <><Trash2 size={18} /> {t('계정 삭제', 'Delete Account', '删除账户', 'アカウント削除')}</>
+            )}
+          </button>
+          <p className="text-[10px] text-zinc-600 mt-3 leading-relaxed">
+            {t(
+              '네모네의 모든 서비스에서 사용하는 계정 자체가 삭제됩니다.',
+              'This deletes the account itself, used across all NEMONE services.',
+              '这将删除NEMONE所有服务共用的账户本身。',
+              'NEMONEのすべてのサービスで使用されるアカウント自体が削除されます。',
+            )}
+          </p>
+        </div>
       </div>
     </div>
   );
