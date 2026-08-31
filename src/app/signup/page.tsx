@@ -31,7 +31,8 @@ export default function SignupPage() {
     setError('');
 
     const nextUrl = new URLSearchParams(window.location.search).get('next');
-    const { error } = await supabase.auth.signUp({
+    const redirectTarget = nextUrl || '/profile';
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -40,10 +41,44 @@ export default function SignupPage() {
       },
     });
 
+    // 이 화면이 로그인 페이지의 "이메일 주소로 시작하기"가 유일하게 연결되는 이메일
+    // 경로인데, 정작 signInWithPassword를 쓰는 곳이 코드 전체에 없어 기존 이메일
+    // 가입자가 다시 로그인할 방법이 없었다(2026-08-31 발견). Supabase는 이미 가입된
+    // 이메일로 signUp을 다시 호출하면 이메일 중복 노출 방지 정책에 따라 두 가지로
+    // 응답한다 — ①명시적 에러("User already registered" 계열) 또는 ②에러 없이
+    // identities가 빈 배열인 가짜 성공 응답. 두 경우 모두 "이미 있는 계정"으로 보고
+    // 같은 비밀번호로 로그인을 시도해 하나의 버튼이 가입/로그인을 다 처리하게 한다.
+    const looksAlreadyRegistered =
+      (!!error && /already registered|already exists/i.test(error.message)) ||
+      (!error && !!data.user && (data.user.identities?.length ?? 0) === 0);
+
+    if (looksAlreadyRegistered) {
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        setError(t(
+          '이미 가입된 이메일이에요. 비밀번호를 다시 확인해주세요.',
+          'This email is already registered. Please check your password.',
+          '该邮箱已注册,请重新确认密码。',
+          'すでに登録済みのメールアドレスです。パスワードをご確認ください。',
+        ));
+        setIsLoading(false);
+      } else {
+        router.push(redirectTarget);
+      }
+      return;
+    }
+
     if (error) {
       setError(error.message);
       setIsLoading(false);
+    } else if (data.session) {
+      // 이 프로젝트는 "Confirm email"이 꺼져 있어(가입 즉시 email_confirmed_at이 찍힘) —
+      // signUp()이 바로 세션을 내려주므로 별도 이메일 인증 없이 그대로 로그인 상태로
+      // 넘어간다. 예전엔 "이메일을 확인해주세요" 안내를 띄우고 로그인 화면으로 돌려보냈는데,
+      // 실제로는 인증할 이메일이 안 오니 사용자가 헷갈렸음(2026-08-31).
+      router.push(redirectTarget);
     } else {
+      // 혹시 나중에 Confirm email이 켜지는 경우를 대비한 폴백 — 이때는 session이 안 옴
       alert(t(
         '회원가입 신청 완료! 이메일을 확인하여 인증을 완료해주세요.',
         'Sign-up complete! Please check your email to verify your account.',
@@ -72,14 +107,14 @@ export default function SignupPage() {
 
         <div className="mb-10">
           <h2 className="text-3xl font-black text-white tracking-tight mb-2">
-            {t('계정 만들기', 'Create Account', '创建账户', 'アカウント作成')}
+            {t('이메일로 계속하기', 'Continue with Email', '使用邮箱继续', 'メールアドレスで続ける')}
           </h2>
           <p className="text-zinc-500 text-sm font-medium">
             {t(
-              '네모네 생태계의 새로운 멤버가 되어주세요.',
-              'Become a new member of the NEMONE ecosystem.',
-              '成为NEMONE生态系统的新成员。',
-              'NEMONEエコシステムの新しいメンバーになりましょう。',
+              '처음이면 자동으로 가입되고, 이미 계정이 있으면 로그인됩니다.',
+              "New here? We'll create your account. Already a member? You'll be signed in.",
+              '首次使用将自动注册,已有账户将直接登录。',
+              '初めての方は自動的に登録され、既存の方はログインされます。',
             )}
           </p>
         </div>
@@ -144,7 +179,7 @@ export default function SignupPage() {
               className="w-full bg-white text-black rounded-2xl py-4 font-bold flex items-center justify-center gap-2 hover:bg-brand-gold transition-all shadow-xl disabled:opacity-50 mt-8"
             >
               {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                <>{t('가입하기', 'Sign Up', '注册', '登録する')} <ArrowRight className="w-5 h-5" /></>
+                <>{t('계속하기', 'Continue', '继续', '続ける')} <ArrowRight className="w-5 h-5" /></>
               )}
             </button>
           </form>
