@@ -18,10 +18,13 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [lang, setLang] = useState<Lang>('ko');
+  const [loginHref, setLoginHref] = useState('/login');
   const t = (ko: string, en: string, zh: string, ja: string) => tr(lang, ko, en, zh, ja);
 
   useEffect(() => {
     setLang(detectLang(window.location.search));
+    const nextUrl = new URLSearchParams(window.location.search).get('next');
+    if (nextUrl) setLoginHref(`/login?next=${encodeURIComponent(nextUrl)}`);
   }, []);
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -97,7 +100,7 @@ export default function SignupPage() {
         className="w-full max-w-[440px] z-10"
       >
         <div className="flex items-center justify-between mb-8">
-          <Link href="/login" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-sm font-bold">
+          <Link href={loginHref} className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-sm font-bold">
             <ChevronLeft size={18} /> {t('로그인으로 돌아가기', 'Back to login', '返回登录', 'ログインに戻る')}
           </Link>
           <LangSwitcher lang={lang} onChange={setLang} />

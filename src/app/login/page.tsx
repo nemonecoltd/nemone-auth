@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { motion } from 'framer-motion';
-import { Mail, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Mail, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { Lang, detectLang, tr } from '@/utils/lang';
 import LangSwitcher from '@/components/LangSwitcher';
@@ -12,13 +12,17 @@ import BrandBridge from '@/components/BrandBridge';
 export default function LoginPage() {
   const supabase = createClient();
   const [signupHref, setSignupHref] = useState('/signup');
+  const [backHref, setBackHref] = useState<string | null>(null);
   const [lang, setLang] = useState<Lang>('ko');
   const t = (ko: string, en: string, zh: string, ja: string) => tr(lang, ko, en, zh, ja);
 
   useEffect(() => {
     setLang(detectLang(window.location.search));
     const nextUrl = new URLSearchParams(window.location.search).get('next');
-    if (nextUrl) setSignupHref(`/signup?next=${encodeURIComponent(nextUrl)}`);
+    if (nextUrl) {
+      setSignupHref(`/signup?next=${encodeURIComponent(nextUrl)}`);
+      setBackHref(nextUrl);
+    }
   }, []);
 
   const handleKakaoLogin = async () => {
@@ -80,7 +84,16 @@ export default function LoginPage() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-[440px] z-10"
       >
-        <div className="flex justify-center mb-6">
+        <div className="flex items-center justify-between mb-6">
+          {backHref ? (
+            <a
+              href={backHref}
+              className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 text-xs font-bold transition-colors"
+            >
+              <ArrowLeft size={14} />
+              {t('돌아가기', 'Back', '返回', '戻る')}
+            </a>
+          ) : <span />}
           <LangSwitcher lang={lang} onChange={setLang} />
         </div>
 
