@@ -237,6 +237,15 @@ export default function SignupPage() {
               </div>
             </div>
 
+            <div className="text-right -mt-1">
+              <Link
+                href={`/forgot-password${loginHref.includes('next=') ? loginHref.slice(loginHref.indexOf('?')) : ''}`}
+                className="text-[11px] font-bold text-zinc-500 hover:text-white transition-colors"
+              >
+                {t('비밀번호를 잊으셨나요?', 'Forgot your password?', '忘记密码?', 'パスワードをお忘れですか?')}
+              </Link>
+            </div>
+
             <label className="flex items-start gap-3 pt-2 cursor-pointer">
               <input
                 type="checkbox"

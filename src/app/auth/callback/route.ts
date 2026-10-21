@@ -19,6 +19,11 @@ export async function GET(request: Request) {
       // 온보딩 완료 여부 확인
       const onboardingCompleted = data.user.user_metadata?.onboarding_completed;
       
+      // 0. 비밀번호 재설정 링크 — 온보딩을 거치지 않고 바로 재설정 화면으로(이메일 가입자는 온보딩이 비어 있어 거기서 막힌다)
+      if (next.startsWith('/reset-password')) {
+        return NextResponse.redirect(`${origin}${next}`)
+      }
+
       // 1. 온보딩이 안 된 경우 auth 서버의 온보딩 페이지로 (가입을 시작한 사이트로 되돌아갈 수 있도록 next를 이어서 전달)
       if (!onboardingCompleted) {
         const onboardingUrl = next.startsWith('http')
