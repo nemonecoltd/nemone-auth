@@ -4,6 +4,8 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "NEMONE 통합 인증 센터",
   description: "네모네 생태계를 연결하는 단 하나의 계정",
+  // 로그인·가입·프로필 화면은 검색에 노출할 이유가 없다(약관·방침 페이지는 각자 index로 덮어쓴다)
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({

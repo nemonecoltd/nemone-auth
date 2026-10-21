@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
+import { safeNext } from '@/utils/redirect'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/'
+  // next는 검증된 주소(nemoneai.com 계열 https 또는 내부 경로)만 쓴다 — 아니면 계정 프로필로(오픈 리다이렉트 방지)
+  const next = safeNext(searchParams.get('next')) ?? '/profile'
 
  // origin을 request.url 대신 고정값 사용
   const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://auth.nemoneai.com'
@@ -36,6 +38,7 @@ export async function GET(request: Request) {
     }
   }
 
-  // 에러 발생 시 로그인 페이지로
-  return NextResponse.redirect(`${origin}/login?error=auth-code-error`)
+  // 에러 발생 시 로그인 페이지로 — next는 유지해서 다시 시도해도 원래 서비스로 돌아가게 한다
+  const retry = safeNext(searchParams.get('next'))
+  return NextResponse.redirect(`${origin}/login?error=auth-code-error${retry ? `&next=${encodeURIComponent(retry)}` : ''}`)
 }

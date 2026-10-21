@@ -7,6 +7,10 @@ import { Sparkles, Check, ArrowRight, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Lang, detectLang, tr } from '@/utils/lang';
 import LangSwitcher from '@/components/LangSwitcher';
+import LegalLinks from '@/components/LegalLinks';
+import Link from 'next/link';
+import { safeExternalNext } from '@/utils/redirect';
+import { TERMS_VERSION } from '@/utils/services';
 
 const INTERESTS = [
   { id: 'gourmet', ko: '미식', en: 'Gourmet', zh: '美食', ja: 'グルメ', koDesc: '잊지 못할 미학적 미식 경험', enDesc: 'Unforgettable, aesthetic dining experiences', zhDesc: '难忘的美学美食体验', jaDesc: '忘れられない美的グルメ体験' },
@@ -24,6 +28,8 @@ export default function OnboardingPage() {
   const supabase = createClient();
   const [selected, setSelected] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [agree, setAgree] = useState(false);
+  const [agreedBefore, setAgreedBefore] = useState(false);   // 이메일 가입 때 이미 동의한 경우(가입 폼의 동의 기록)
   const [userName, setUserName] = useState('');
   const [lang, setLang] = useState<Lang>('ko');
   const t = (ko: string, en: string, zh: string, ja: string) => tr(lang, ko, en, zh, ja);
@@ -36,6 +42,10 @@ export default function OnboardingPage() {
         router.push('/login');
       } else {
         setUserName(user.user_metadata?.full_name || t('멤버', 'Member', '会员', 'メンバー'));
+        if (user.user_metadata?.terms_agreed_at) {
+          setAgreedBefore(true);
+          setAgree(true);
+        }
       }
     };
     checkUser();
@@ -55,18 +65,28 @@ export default function OnboardingPage() {
       '少なくとも1つ以上の興味を選択してください。',
     ));
 
+    if (!agree) return alert(t(
+      '이용약관과 개인정보처리방침에 동의해 주세요.',
+      'Please agree to the Terms and Privacy Policy.',
+      '请同意服务条款和隐私政策。',
+      '利用規約とプライバシーポリシーに同意してください。',
+    ));
+
     setIsSaving(true);
     const { error } = await supabase.auth.updateUser({
       data: {
         interests: selected,
-        onboarding_completed: true
+        onboarding_completed: true,
+        // 동의한 시각과 약관 버전을 계정에 남긴다(구글·카카오·네이버로 가입한 사용자의 동의 기록)
+        terms_agreed_at: new Date().toISOString(),
+        terms_version: TERMS_VERSION,
       }
     });
 
     if (!error) {
       // 가입을 시작한 사이트(AIM/PACE/PLANTS 등)로 복귀. next가 없으면 기본적으로 메인 매거진으로 안내.
-      const nextUrl = new URLSearchParams(window.location.search).get('next');
-      window.location.href = (nextUrl && nextUrl.startsWith('http')) ? nextUrl : 'https://nemoneai.com';
+      const nextUrl = safeExternalNext(new URLSearchParams(window.location.search).get('next'));
+      window.location.href = nextUrl || 'https://nemoneai.com';
     } else {
       alert(t(
         '저장 중 오류가 발생했습니다.',
@@ -132,15 +152,35 @@ export default function OnboardingPage() {
           })}
         </div>
 
+        {!agreedBefore && (
+        <label className="flex items-start justify-center gap-3 mb-8 cursor-pointer text-left max-w-md mx-auto">
+          <input
+            type="checkbox"
+            checked={agree}
+            onChange={(e) => setAgree(e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-[#D4AF37] shrink-0"
+          />
+          <span className="text-xs leading-relaxed text-zinc-400">
+            {t('[필수] 만 14세 이상이며, ', '[Required] I am 14 or older and agree to the ', '[必填] 我已满14岁,并同意', '[必須] 14歳以上であり、')}
+            <Link href="/terms" target="_blank" className="text-brand-gold underline underline-offset-2">{t('이용약관', 'Terms of Service', '服务条款', '利用規約')}</Link>
+            {t('과 ', ' and ', '和', 'と')}
+            <Link href="/privacy" target="_blank" className="text-brand-gold underline underline-offset-2">{t('개인정보처리방침', 'Privacy Policy', '隐私政策', 'プライバシーポリシー')}</Link>
+            {t('에 동의합니다.', '.', '。', 'に同意します。')}
+          </span>
+        </label>
+        )}
+
         <button
           onClick={handleComplete}
-          disabled={selected.length === 0 || isSaving}
+          disabled={selected.length === 0 || !agree || isSaving}
           className="w-full md:w-auto px-12 py-5 bg-white text-black rounded-full font-bold flex items-center justify-center gap-3 hover:bg-brand-emerald hover:text-white transition-all shadow-2xl disabled:opacity-30 mx-auto"
         >
           {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : (
             <>{t('네모네 생태계 입장하기', 'Enter the NEMONE ecosystem', '进入NEMONE生态系统', 'NEMONEエコシステムへ入る')} <ArrowRight className="w-5 h-5" /></>
           )}
         </button>
+
+        <LegalLinks className="mt-8" />
       </motion.div>
     </div>
   );

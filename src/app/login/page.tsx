@@ -8,26 +8,38 @@ import Link from 'next/link';
 import { Lang, detectLang, tr } from '@/utils/lang';
 import LangSwitcher from '@/components/LangSwitcher';
 import BrandBridge from '@/components/BrandBridge';
+import LegalLinks from '@/components/LegalLinks';
+import { safeNext } from '@/utils/redirect';
 
 export default function LoginPage() {
   const supabase = createClient();
   const [signupHref, setSignupHref] = useState('/signup');
   const [backHref, setBackHref] = useState<string | null>(null);
   const [lang, setLang] = useState<Lang>('ko');
+  const [notice, setNotice] = useState('');
   const t = (ko: string, en: string, zh: string, ja: string) => tr(lang, ko, en, zh, ja);
 
   useEffect(() => {
     setLang(detectLang(window.location.search));
-    const nextUrl = new URLSearchParams(window.location.search).get('next');
+    const params = new URLSearchParams(window.location.search);
+    const nextUrl = safeNext(params.get('next'));   // 검증된 주소만 사용(오픈 리다이렉트 방지)
     if (nextUrl) {
       setSignupHref(`/signup?next=${encodeURIComponent(nextUrl)}`);
       setBackHref(nextUrl);
+    }
+    // 인증 링크를 다른 기기·브라우저에서 열면 로그인 연결(세션 교환)만 실패하고 이메일 인증 자체는 끝나 있다 — 로그인하면 된다고 안내
+    if (params.get('error') === 'auth-code-error') {
+      setNotice(tr(detectLang(window.location.search),
+        '로그인 연결이 완료되지 않았어요. 이메일 인증을 이미 마쳤다면 같은 이메일로 다시 로그인해 주세요.',
+        'The sign-in link did not complete. If you already verified your email, please sign in again with it.',
+        '登录连接未完成。如果已完成邮箱验证,请使用同一邮箱重新登录。',
+        'ログインが完了しませんでした。メール認証が済んでいる場合は、同じメールアドレスで再度ログインしてください。'));
     }
   }, []);
 
   const handleKakaoLogin = async () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const nextUrl = urlParams.get('next');
+    const nextUrl = safeNext(urlParams.get('next'));
     let redirectUrl = `${window.location.origin}/auth/callback`;
     if (nextUrl) redirectUrl += `?next=${encodeURIComponent(nextUrl)}`;
 
@@ -42,7 +54,7 @@ export default function LoginPage() {
 
   const handleNaverLogin = async () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const nextUrl = urlParams.get('next');
+    const nextUrl = safeNext(urlParams.get('next'));
     let redirectUrl = `${window.location.origin}/auth/callback`;
     if (nextUrl) redirectUrl += `?next=${encodeURIComponent(nextUrl)}`;
 
@@ -57,7 +69,7 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     // URL에서 next 파라미터 추출
     const urlParams = new URLSearchParams(window.location.search);
-    const nextUrl = urlParams.get('next');
+    const nextUrl = safeNext(urlParams.get('next'));
     
     // 콜백 URL 구성 (next 파라미터가 있으면 전달)
     let redirectUrl = `${window.location.origin}/auth/callback`;
@@ -115,6 +127,11 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white/5 border border-white/10 p-10 rounded-[40px] backdrop-blur-xl shadow-2xl">
+          {notice && (
+            <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-bold rounded-2xl text-center leading-relaxed">
+              {notice}
+            </div>
+          )}
           <div className="space-y-4">
             {/* Google Login Button */}
             <button 
@@ -183,6 +200,11 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
+
+        <p className="mt-6 text-center text-[10px] leading-relaxed text-zinc-600">
+          {t('계속하면 이용약관과 개인정보처리방침에 동의하는 것으로 봅니다.', 'By continuing, you agree to the Terms and Privacy Policy.', '继续即表示您同意服务条款和隐私政策。', '続行すると、利用規約とプライバシーポリシーに同意したものとみなされます。')}
+        </p>
+        <LegalLinks className="mt-2" />
 
         {/* Brand Bridge Slogans */}
         <BrandBridge className="mt-12" />

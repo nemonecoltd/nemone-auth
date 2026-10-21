@@ -5,6 +5,9 @@ import { createClient } from '@/utils/supabase/client';
 import { Camera, Loader2, Save, User as UserIcon, Globe, ArrowLeft, Check, Trash2 } from 'lucide-react';
 import { Lang, detectLang, tr } from '@/utils/lang';
 import LangSwitcher from '@/components/LangSwitcher';
+import LegalLinks from '@/components/LegalLinks';
+import { safeExternalNext } from '@/utils/redirect';
+import { SERVICE_NAMES } from '@/utils/services';
 
 // 공용 계정 프로필 편집 — 이름/사진/성별/나이/국적은 Supabase auth.users의 user_metadata에
 // 저장되는 "계정 데이터"라 특정 서비스(PACE)가 아니라 인증 센터가 소유하는 게 맞다.
@@ -44,8 +47,8 @@ function ProfileContent() {
 
   useEffect(() => {
     setLang(detectLang(window.location.search));
-    const next = new URLSearchParams(window.location.search).get('next');
-    if (next && next.startsWith('http')) setNextUrl(next);
+    const next = safeExternalNext(new URLSearchParams(window.location.search).get('next'));   // 검증된 주소만(오픈 리다이렉트 방지)
+    if (next) setNextUrl(next);
 
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -157,10 +160,10 @@ function ProfileContent() {
 
   const handleDeleteAccount = async () => {
     const confirmed = confirm(t(
-      '정말 계정을 삭제하시겠습니까?\n네모네(PACE/PLANTS/matmatch 등 모든 서비스)에서 이 계정으로 다시 로그인할 수 없게 되며, 이 작업은 되돌릴 수 없습니다.',
-      'Are you sure you want to delete your account?\nYou will no longer be able to sign in with this account on any NEMONE service (PACE/PLANTS/matmatch, etc). This cannot be undone.',
-      '确定要删除账户吗?\n此账户将无法再登录任何NEMONE服务(PACE/PLANTS/matmatch等),此操作无法撤销。',
-      '本当にアカウントを削除しますか?\nこのアカウントではNEMONEのすべてのサービス(PACE/PLANTS/matmatchなど)に再度ログインできなくなり、この操作は元に戻せません。',
+      `정말 계정을 삭제하시겠습니까?\n네모네의 모든 서비스(${SERVICE_NAMES})에서 이 계정으로 다시 로그인할 수 없게 되며, 이 작업은 되돌릴 수 없습니다.\n※ 각 서비스에 저장된 이용 기록은 해당 서비스 방침에 따라 보관·파기됩니다.`,
+      `Are you sure you want to delete your account?\nYou will no longer be able to sign in with this account on any NEMONE service (${SERVICE_NAMES}). This cannot be undone.\nUsage records stored in each service are kept or deleted according to that service's policy.`,
+      `确定要删除账户吗?\n此账户将无法再登录任何NEMONE服务(${SERVICE_NAMES}),此操作无法撤销。\n各服务中保存的使用记录将按该服务的政策保管或销毁。`,
+      `本当にアカウントを削除しますか?\nこのアカウントではNEMONEのすべてのサービス(${SERVICE_NAMES})に再度ログインできなくなり、この操作は元に戻せません。\n各サービスに保存された利用記録は、そのサービスの方針に従って保管・破棄されます。`,
     ));
     if (!confirmed) return;
 
@@ -361,6 +364,8 @@ function ProfileContent() {
             )}
           </p>
         </div>
+
+        <LegalLinks className="mt-10" />
       </div>
     </div>
   );
