@@ -16,7 +16,7 @@ export const COMPANY = {
   regNo: '116-86-03188',
   address: '제주특별자치도 제주시 한경면 낙조길 196-18',
   email: 'contact@nemoneai.com',
-  tel: '02-6417-7328',
+  tel: '02-6417-7318',
 };
 
 // 약관·방침을 바꾸면 이 값도 같이 올린다 — 가입 시 동의한 버전이 계정 정보(user_metadata)에 기록된다.
